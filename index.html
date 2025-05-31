@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue Todo PWA</title>
+    <link rel="manifest" href="#" id="manifest-placeholder">
+    <meta name="theme-color" content="#4285f4">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Todo PWA">
+    <link rel="apple-touch-icon"
+        href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMjgiIGhlaWdodD0iMTI4Ij48cmVjdCB4PSI0IiB5PSI0IiB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgZmlsbD0iIzQyODVmNCIgcng9IjIiIHJ5PSI0Ii8+PHRleHQgeD0iNjQiIHk9IjcwIiBmaWxsPSIjZmZmIiBmb250LXNpemU9IjQ4IiBmb250LWZhbWlseT0iYXJpYWwiIHRleHQtYW5jaG9yPSJtaWRkbGUiPvCfk508L3RleHQ+PC9zdmc+">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .app {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .add-todo {
+            padding: 30px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .todo-input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .todo-input:focus {
+            outline: none;
+            border-color: #4285f4;
+        }
+
+        .add-btn {
+            padding: 15px 25px;
+            background: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .add-btn:hover {
+            background: #3367d6;
+        }
+
+        .filters {
+            padding: 20px 30px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 2px solid #e1e5e9;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-btn.active {
+            background: #4285f4;
+            color: white;
+            border-color: #4285f4;
+        }
+
+        .todo-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .todo-item {
+            display: flex;
+            align-items: center;
+            padding: 20px 30px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.3s;
+        }
+
+        .todo-item:hover {
+            background: #f8f9fa;
+        }
+
+        .todo-checkbox {
+            width: 20px;
+            height: 20px;
+            margin-right: 15px;
+            cursor: pointer;
+        }
+
+        .todo-text {
+            flex: 1;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .todo-text.completed {
+            text-decoration: line-through;
+            color: #888;
+        }
+
+        .delete-btn {
+            background: #ea4335;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .delete-btn:hover {
+            background: #d23d2e;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 30px;
+            color: #888;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .manual-install-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+
+        .manual-install-btn:hover {
+            background: white;
+            color: #4285f4;
+        }
+
+        .debug-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 9999;
+            max-width: 300px;
+        }
+
+        .debug-toggle {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 10000;
+            font-size: 12px;
+        }
+
+        @media (max-width: 640px) {
+            .app {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .input-group {
+                flex-direction: column;
+            }
+
+            .filters {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <button @click="toggleDebug" class="debug-toggle">Debug</button>
+
+        <div v-if="showDebug" class="debug-info">
+            <div><strong>PWA Debug Info:</strong></div>
+            <div>beforeinstallprompt fired: {{ debugInfo.promptFired ? '✅' : '❌' }}</div>
+            <div>Service Worker: {{ debugInfo.swRegistered ? '✅' : '❌' }}</div>
+            <div>Standalone mode: {{ debugInfo.isStandalone ? '✅' : '❌' }}</div>
+            <div>Platform: {{ debugInfo.platform }}</div>
+            <div>Protocol: {{ debugInfo.protocol }}</div>
+            <div>Install available: {{ debugInfo.canInstall ? '✅' : '❌' }}</div>
+        </div>
+
+        <div class="app">
+            <div class="header">
+                <h1>📝 My Todo List</h1>
+                <p>Stay organized and productive</p>
+                <button v-if="showManualInstall" @click="triggerInstall" class="manual-install-btn">
+                    📱 Install App
+                </button>
+            </div>
+
+            <div class="add-todo">
+                <div class="input-group">
+                    <input type="text" v-model="newTodo" @keyup.enter="addTodo" placeholder="What needs to be done?"
+                        class="todo-input">
+                    <button @click="addTodo" class="add-btn">Add</button>
+                </div>
+            </div>
+
+            <div class="filters">
+                <button @click="currentFilter = 'all'" :class="['filter-btn', { active: currentFilter === 'all' }]">
+                    All ({{ todos.length }})
+                </button>
+                <button @click="currentFilter = 'active'"
+                    :class="['filter-btn', { active: currentFilter === 'active' }]">
+                    Active ({{ activeTodos.length }})
+                </button>
+                <button @click="currentFilter = 'completed'"
+                    :class="['filter-btn', { active: currentFilter === 'completed' }]">
+                    Completed ({{ completedTodos.length }})
+                </button>
+            </div>
+
+            <div class="todo-list" v-if="filteredTodos.length > 0">
+                <div v-for="todo in filteredTodos" :key="todo.id" class="todo-item">
+                    <input type="checkbox" v-model="todo.completed" @change="updateTodo(todo)" class="todo-checkbox">
+                    <span :class="['todo-text', { completed: todo.completed }]">
+                        {{ todo.text }}
+                    </span>
+                    <button @click="deleteTodo(todo.id)" class="delete-btn">
+                        🗑️
+                    </button>
+                </div>
+            </div>
+
+            <div v-else class="empty-state">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                </svg>
+                <h3>No todos yet!</h3>
+                <p>Add your first task to get started</p>
+            </div>
+
+            <div class="stats" v-if="todos.length > 0">
+                {{ completedTodos.length }} of {{ todos.length }} tasks completed
+                <span v-if="completedTodos.length === todos.length">🎉</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.3.4/vue.global.prod.min.js"></script>
+    <script>
+        // IndexedDB helper class
+        class TodoDB {
+            constructor() {
+                this.dbName = 'TodoApp';
+                this.version = 1;
+                this.storeName = 'todos';
+                this.db = null;
+            }
+
+            async init() {
+                return new Promise((resolve, reject) => {
+                    const request = indexedDB.open(this.dbName, this.version);
+
+                    request.onerror = () => reject(request.error);
+                    request.onsuccess = () => {
+                        this.db = request.result;
+                        resolve();
+                    };
+
+                    request.onupgradeneeded = (event) => {
+                        const db = event.target.result;
+                        if (!db.objectStoreNames.contains(this.storeName)) {
+                            const store = db.createObjectStore(this.storeName, { keyPath: 'id' });
+                            store.createIndex('completed', 'completed');
+                        }
+                    };
+                });
+            }
+
+            async getAllTodos() {
+                const transaction = this.db.transaction([this.storeName], 'readonly');
+                const store = transaction.objectStore(this.storeName);
+                return new Promise((resolve, reject) => {
+                    const request = store.getAll();
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+            }
+
+            async addTodo(todo) {
+                const transaction = this.db.transaction([this.storeName], 'readwrite');
+                const store = transaction.objectStore(this.storeName);
+                return new Promise((resolve, reject) => {
+                    const request = store.add(todo);
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+            }
+
+            async updateTodo(todo) {
+                const transaction = this.db.transaction([this.storeName], 'readwrite');
+                const store = transaction.objectStore(this.storeName);
+                return new Promise((resolve, reject) => {
+                    const request = store.put(todo);
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+            }
+
+            async deleteTodo(id) {
+                const transaction = this.db.transaction([this.storeName], 'readwrite');
+                const store = transaction.objectStore(this.storeName);
+                return new Promise((resolve, reject) => {
+                    const request = store.delete(id);
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+            }
+        }
+
+        // Vue App
+        const { createApp, ref, computed, onMounted } = Vue;
+
+        createApp({
+            setup() {
+                const todos = ref([]);
+                const newTodo = ref('');
+                const currentFilter = ref('all');
+                const db = new TodoDB();
+                const showManualInstall = ref(false);
+                const showDebug = ref(false);
+                const debugInfo = ref({
+                    promptFired: false,
+                    swRegistered: false,
+                    isStandalone: false,
+                    platform: navigator.userAgent,
+                    protocol: window.location.protocol,
+                    canInstall: false
+                });
+
+                const activeTodos = computed(() =>
+                    todos.value.filter(todo => !todo.completed)
+                );
+
+                const completedTodos = computed(() =>
+                    todos.value.filter(todo => todo.completed)
+                );
+
+                const filteredTodos = computed(() => {
+                    switch (currentFilter.value) {
+                        case 'active':
+                            return activeTodos.value;
+                        case 'completed':
+                            return completedTodos.value;
+                        default:
+                            return todos.value;
+                    }
+                });
+
+                const loadTodos = async () => {
+                    try {
+                        const loadedTodos = await db.getAllTodos();
+                        todos.value = loadedTodos.sort((a, b) => b.id - a.id);
+                    } catch (error) {
+                        console.error('Error loading todos:', error);
+                    }
+                };
+
+                const addTodo = async () => {
+                    if (!newTodo.value.trim()) return;
+
+                    const todo = {
+                        id: Date.now(),
+                        text: newTodo.value.trim(),
+                        completed: false,
+                        createdAt: new Date().toISOString()
+                    };
+
+                    try {
+                        await db.addTodo(todo);
+                        todos.value.unshift(todo);
+                        newTodo.value = '';
+                    } catch (error) {
+                        console.error('Error adding todo:', error);
+                    }
+                };
+
+                const updateTodo = async (todo) => {
+                    try {
+                        await db.updateTodo(todo);
+                    } catch (error) {
+                        console.error('Error updating todo:', error);
+                    }
+                };
+
+                const deleteTodo = async (id) => {
+                    try {
+                        await db.deleteTodo(id);
+                        todos.value = todos.value.filter(todo => todo.id !== id);
+                    } catch (error) {
+                        console.error('Error deleting todo:', error);
+                    }
+                };
+
+                const toggleDebug = () => {
+                    showDebug.value = !showDebug.value;
+                };
+
+                const triggerInstall = () => {
+                    if (window.deferredPrompt) {
+                        window.deferredPrompt.prompt();
+                    } else {
+                        // Show manual install instructions
+                        alert('To install this app:\n\n' +
+                            'Chrome: Menu (⋮) → "Install Todo PWA"\n' +
+                            'Edge: Menu (⋯) → "Apps" → "Install this site as an app"\n' +
+                            'Safari: Share button → "Add to Home Screen"\n' +
+                            'Firefox: Menu → "Install this site as an app"');
+                    }
+                };
+
+                onMounted(async () => {
+                    try {
+                        await db.init();
+                        await loadTodos();
+
+                        // Update debug info
+                        debugInfo.value.isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+                        debugInfo.value.canInstall = 'serviceWorker' in navigator;
+
+                        // Always show manual install button for testing
+                        showManualInstall.value = !debugInfo.value.isStandalone;
+
+                    } catch (error) {
+                        console.error('Error initializing app:', error);
+                    }
+                });
+
+                return {
+                    todos,
+                    newTodo,
+                    currentFilter,
+                    activeTodos,
+                    completedTodos,
+                    filteredTodos,
+                    addTodo,
+                    updateTodo,
+                    deleteTodo,
+                    showManualInstall,
+                    showDebug,
+                    debugInfo,
+                    toggleDebug,
+                    triggerInstall
+                };
+            }
+        }).mount('#app');
+
+        // Create and set up the PWA manifest
+        const currentUrl = window.location.href;
+        const baseUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/') + 1);
+
+        const manifestData = {
+            name: "Vue Todo PWA",
+            short_name: "TodoApp",
+            start_url: currentUrl,
+            scope: baseUrl,
+            display: "standalone",
+            background_color: "#ffffff",
+            theme_color: "#4285f4",
+            orientation: "portrait",
+            categories: ["productivity", "utilities"],
+            lang: "en",
+            dir: "ltr",
+            icons: [
+                {
+                    src: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIj48cmVjdCB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgZmlsbD0iIzQyODVmNCIgcng9IjIwIi8+PHRleHQgeD0iOTYiIHk9IjEyMCIgZm9udC1zaXplPSI4MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiPvCfk508L3RleHQ+PC9zdmc+",
+                    sizes: "192x192",
+                    type: "image/svg+xml",
+                    purpose: "any maskable"
+                },
+                {
+                    src: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgZmlsbD0iIzQyODVmNCIgcng9IjUwIi8+PHRleHQgeD0iMjU2IiB5PSIzMjAiIGZvbnQtc2l6ZT0iMjAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSI+8J+TnTwvdGV4dD48L3N2Zz4=",
+                    sizes: "512x512",
+                    type: "image/svg+xml",
+                    purpose: "any maskable"
+                }
+            ],
+            screenshots: [
+                {
+                    src: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzOTAiIGhlaWdodD0iODQ0Ij48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImEiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiM2NjdlZWEiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiM3NjRiYTIiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iMzkwIiBoZWlnaHQ9Ijg0NCIgZmlsbD0idXJsKCNhKSIvPjxyZWN0IHg9IjIwIiB5PSI1MCIgd2lkdGg9IjM1MCIgaGVpZ2h0PSI3NDQiIGZpbGw9IndoaXRlIiByeD0iMjAiLz48cmVjdCB4PSIyMCIgeT0iNTAiIHdpZHRoPSIzNTAiIGhlaWdodD0iMTAwIiBmaWxsPSIjNDI4NWY0IiByeD0iMjAiIHJ5PSIyMCIvPjx0ZXh0IHg9IjE5NSIgeT0iMTEwIiBmb250LXNpemU9IjI0IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiPvCfk50gTXkgVG9kbyBMaXN0PC90ZXh0Pjx0ZXh0IHg9IjE5NSIgeT0iMTMwIiBmb250LXNpemU9IjEyIiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiPlN0YXkgb3JnYW5pemVkPC90ZXh0PjxyZWN0IHg9IjQwIiB5PSIxODAiIHdpZHRoPSIzMTAiIGhlaWdodD0iNDAiIGZpbGw9IiNmOGY5ZmEiIHJ4PSIxMCIvPjx0ZXh0IHg9IjUwIiB5PSIyMDUiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM4ODgiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIj5XaGF0IG5lZWRzIHRvIGJlIGRvbmU/PC90ZXh0PjxyZWN0IHg9IjQwIiB5PSIyNTAiIHdpZHRoPSIzMTAiIGhlaWdodD0iNDAiIGZpbGw9IndoaXRlIiBzdHJva2U9IiNlZWUiIHN0cm9rZS13aWR0aD0iMSIvPjx0ZXh0IHg9IjUwIiB5PSIyNzUiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiMzMzMiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIj7inJMgQnV5IGdyb2NlcmllczwvdGV4dD48cmVjdCB4PSI0MCIgeT0iMjkwIiB3aWR0aD0iMzEwIiBoZWlnaHQ9IjQwIiBmaWxsPSJ3aGl0ZSIgc3Ryb2tlPSIjZWVlIiBzdHJva2Utd2lkdGg9IjEiLz48dGV4dCB4PSI1MCIgeT0iMzE1IiBmb250LXNpemU9IjE0IiBmaWxsPSIjMzMzIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiI+4pyTIEZpbmlzaCBwcm9qZWN0PC90ZXh0PjxyZWN0IHg9IjQwIiB5PSIzMzAiIHdpZHRoPSIzMTAiIGhlaWdodD0iNDAiIGZpbGw9IndoaXRlIiBzdHJva2U9IiNlZWUiIHN0cm9rZS13aWR0aD0iMSIvPjx0ZXh0IHg9IjUwIiB5PSIzNTUiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM4ODgiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiB0ZXh0LWRlY29yYXRpb249ImxpbmUtdGhyb3VnaCI+4pyTIENhbGwgZnJpZW5kcyAoZG9uZSk8L3RleHQ+PC9zdmc+",
+                    sizes: "390x844",
+                    type: "image/svg+xml",
+                    form_factor: "narrow"
+                },
+                {
+                    src: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDI0IiBoZWlnaHQ9Ijc2OCI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJhIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjNjY3ZWVhIi8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjNzY0YmEyIi8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMjQiIGhlaWdodD0iNzY4IiBmaWxsPSJ1cmwoI2EpIi8+PHJlY3QgeD0iMjEyIiB5PSI4NCIgd2lkdGg9IjYwMCIgaGVpZ2h0PSI2MDAiIGZpbGw9IndoaXRlIiByeD0iMjAiLz48cmVjdCB4PSIyMTIiIHk9Ijg0IiB3aWR0aD0iNjAwIiBoZWlnaHQ9IjEyMCIgZmlsbD0iIzQyODVmNCIgcng9IjIwIiByeT0iMjAiLz48dGV4dCB4PSI1MTIiIHk9IjE2MCIgZm9udC1zaXplPSIzNiIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIj7wn5OdIE15IFRvZG8gTGlzdDwvdGV4dD48dGV4dCB4PSI1MTIiIHk9IjE4NSIgZm9udC1zaXplPSIxNiIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIj5TdGF5IG9yZ2FuaXplZCBhbmQgcHJvZHVjdGl2ZTwvdGV4dD48cmVjdCB4PSIyNDIiIHk9IjI0MCIgd2lkdGg9IjQ2MCIgaGVpZ2h0PSI1MCIgZmlsbD0iI2Y4ZjlmYSIgcng9IjEwIi8+PHRleHQgeD0iMjYyIiB5PSIyNzAiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9IiM4ODgiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIj5XaGF0IG5lZWRzIHRvIGJlIGRvbmU/PC90ZXh0PjxyZWN0IHg9IjI0MiIgeT0iMzIwIiB3aWR0aD0iNTQwIiBoZWlnaHQ9IjUwIiBmaWxsPSJ3aGl0ZSIgc3Ryb2tlPSIjZWVlIiBzdHJva2Utd2lkdGg9IjEiLz48dGV4dCB4PSIyNzIiIHk9IjM1MCIgZm9udC1zaXplPSIxNiIgZmlsbD0iIzMzMyIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiPuKckiBCdXkgZ3JvY2VyaWVzPC90ZXh0PjxyZWN0IHg9IjI0MiIgeT0iMzcwIiB3aWR0aD0iNTQwIiBoZWlnaHQ9IjUwIiBmaWxsPSJ3aGl0ZSIgc3Ryb2tlPSIjZWVlIiBzdHJva2Utd2lkdGg9IjEiLz48dGV4dCB4PSIyNzIiIHk9IjQwMCIgZm9udC1zaXplPSIxNiIgZmlsbD0iIzMzMyIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiPuKckiBGaW5pc2ggcHJvamVjdDwvdGV4dD48cmVjdCB4PSIyNDIiIHk9IjQyMCIgd2lkdGg9IjU0MCIgaGVpZ2h0PSI1MCIgZmlsbD0id2hpdGUiIHN0cm9rZT0iI2VlZSIgc3Ryb2tlLXdpZHRoPSIxIi8+PHRleHQgeD0iMjcyIiB5PSI0NTAiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9IiM4ODgiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiB0ZXh0LWRlY29yYXRpb249ImxpbmUtdGhyb3VnaCI+4pyTIENhbGwgZnJpZW5kcyAoZG9uZSk8L3RleHQ+PC9zdmc+",
+                    sizes: "1024x768",
+                    type: "image/svg+xml",
+                    form_factor: "wide"
+                }
+            ]
+        };
+
+        const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: 'application/json' });
+        const manifestUrl = URL.createObjectURL(manifestBlob);
+        document.getElementById('manifest-placeholder').href = manifestUrl;
+
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const swCode = `
+                    const CACHE_NAME = 'todo-pwa-v2';
+                    const urlsToCache = [
+                        './',
+                        'https://cdnjs.cloudflare.com/ajax/libs/vue/3.3.4/vue.global.prod.min.js'
+                    ];
+                    
+                    self.addEventListener('install', (event) => {
+                        console.log('SW installing...');
+                        event.waitUntil(
+                            caches.open(CACHE_NAME)
+                                .then((cache) => {
+                                    console.log('Caching resources');
+                                    return cache.addAll(urlsToCache);
+                                })
+                        );
+                        self.skipWaiting();
+                    });
+                    
+                    self.addEventListener('activate', (event) => {
+                        console.log('SW activated');
+                        event.waitUntil(
+                            caches.keys().then((cacheNames) => {
+                                return Promise.all(
+                                    cacheNames.map((cacheName) => {
+                                        if (cacheName !== CACHE_NAME) {
+                                            return caches.delete(cacheName);
+                                        }
+                                    })
+                                );
+                            })
+                        );
+                        self.clients.claim();
+                    });
+                    
+                    self.addEventListener('fetch', (event) => {
+                        event.respondWith(
+                            caches.match(event.request)
+                                .then((response) => {
+                                    return response || fetch(event.request);
+                                })
+                                .catch(() => {
+                                    // Fallback for offline
+                                    if (event.request.destination === 'document') {
+                                        return caches.match('./');
+                                    }
+                                })
+                        );
+                    });
+                `;
+
+                const blob = new Blob([swCode], { type: 'application/javascript' });
+                const swUrl = URL.createObjectURL(blob);
+
+                navigator.serviceWorker.register(swUrl)
+                    .then((registration) => {
+                        console.log('SW registered successfully:', registration);
+                    })
+                    .catch((error) => {
+                        console.log('SW registration failed:', error);
+                    });
+            });
+        }
+
+        // PWA Install Prompt - Enhanced with debugging
+        let deferredPrompt = null;
+        let installBannerShown = false;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('🎉 beforeinstallprompt event fired!');
+            e.preventDefault();
+            deferredPrompt = e;
+            window.deferredPrompt = e; // Make globally accessible
+
+            // Update debug info
+            if (window.debugInfoRef) {
+                window.debugInfoRef.value.promptFired = true;
+                window.debugInfoRef.value.canInstall = true;
+            }
+
+            if (!installBannerShown) {
+                showInstallBanner();
+                installBannerShown = true;
+            }
+        });
+
+        // Make debugging accessible globally
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const app = document.querySelector('#app').__vueParentComponent;
+                if (app && app.setupState) {
+                    window.debugInfoRef = app.setupState.debugInfo;
+                }
+            }, 1000);
+        });
+
+        function showInstallBanner() {
+            console.log('📱 Showing install banner');
+
+            // Remove any existing banner first
+            const existingBanner = document.getElementById('install-banner');
+            if (existingBanner) {
+                existingBanner.remove();
+            }
+
+            const installBanner = document.createElement('div');
+            installBanner.id = 'install-banner';
+            installBanner.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                right: 20px;
+                background: #4285f4;
+                color: white;
+                padding: 15px;
+                border-radius: 10px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 1000;
+                text-align: center;
+                animation: slideUp 0.3s ease-out;
+            `;
+
+            installBanner.innerHTML = `
+                <style>
+                    @keyframes slideUp {
+                        from { transform: translateY(100%); opacity: 0; }
+                        to { transform: translateY(0); opacity: 1; }
+                    }
+                </style>
+                <p style="margin: 0 0 10px 0; font-size: 14px;">📱 Install this app for a better experience!</p>
+                <button id="install-btn" style="background: white; color: #4285f4; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-right: 10px; font-weight: 500;">Install Now</button>
+                <button id="later-btn" style="background: transparent; color: white; border: 1px solid white; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 500;">Maybe Later</button>
+            `;
+
+            document.body.appendChild(installBanner);
+
+            // Add event listeners
+            document.getElementById('install-btn').addEventListener('click', installApp);
+            document.getElementById('later-btn').addEventListener('click', () => {
+                installBanner.remove();
+                setTimeout(() => {
+                    if (deferredPrompt && !window.matchMedia('(display-mode: standalone)').matches) {
+                        showInstallBanner();
+                    }
+                }, 300000); // Show again after 5 minutes
+            });
+        }
+
+        async function installApp() {
+            console.log('🚀 Install button clicked');
+            if (deferredPrompt) {
+                console.log('📥 Showing install prompt');
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log('📊 Install prompt result:', outcome);
+
+                deferredPrompt = null;
+                window.deferredPrompt = null;
+
+                const banner = document.getElementById('install-banner');
+                if (banner) {
+                    banner.remove();
+                }
+            } else {
+                console.log('❌ No deferred prompt available');
+            }
+        }
+
+        // Enhanced debugging - Force show banner for testing
+        window.addEventListener('load', () => {
+            console.log('🔍 PWA Debug Info:');
+            console.log('- Protocol:', window.location.protocol);
+            console.log('- Is localhost:', window.location.hostname === 'localhost');
+            console.log('- Is HTTPS:', window.location.protocol === 'https:');
+            console.log('- Is file:', window.location.protocol === 'file:');
+            console.log('- User Agent:', navigator.userAgent);
+            console.log('- SW supported:', 'serviceWorker' in navigator);
+            console.log('- Is standalone:', window.matchMedia('(display-mode: standalone)').matches);
+
+            setTimeout(() => {
+                const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+                const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                const isHTTPS = window.location.protocol === 'https:';
+                const isFile = window.location.protocol === 'file:';
+
+                console.log('🔍 Install conditions check:');
+                console.log('- deferredPrompt available:', !!deferredPrompt);
+                console.log('- Not in standalone:', !isStandalone);
+                console.log('- Secure context:', isLocalhost || isHTTPS);
+
+                // For testing: show banner if conditions seem right but prompt didn't fire
+                if (!deferredPrompt && !isStandalone && !installBannerShown && !isFile) {
+                    console.log('⚠️ Expected install prompt but none fired. This might be because:');
+                    console.log('  - You need to serve over HTTPS (not file://)');
+                    console.log('  - Browser requirements not met');
+                    console.log('  - App already installed');
+                    console.log('  - PWA criteria not fully satisfied');
+
+                    // Show a different banner explaining the situation
+                    showFallbackInstallBanner();
+                }
+            }, 3000);
+        });
+
+        function showFallbackInstallBanner() {
+            const fallbackBanner = document.createElement('div');
+            fallbackBanner.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                right: 20px;
+                background: #ff9800;
+                color: white;
+                padding: 15px;
+                border-radius: 10px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 1000;
+                text-align: center;
+                font-size: 14px;
+            `;
+
+            fallbackBanner.innerHTML = `
+                <p style="margin: 0 0 10px 0;">⚠️ Install prompt not available</p>
+                <p style="margin: 0 0 10px 0; font-size: 12px;">Try: serving over HTTPS or use browser's install option</p>
+                <button onclick="this.parentElement.remove()" style="background: white; color: #ff9800; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">OK</button>
+            `;
+
+            document.body.appendChild(fallbackBanner);
+        }
+
+        // Listen for successful installation
+        window.addEventListener('appinstalled', (evt) => {
+            console.log('App was installed successfully');
+            const banner = document.getElementById('install-banner');
+            if (banner) {
+                banner.remove();
+            }
+        });
+    </script>
+</body>
+
+</html>
