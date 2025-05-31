@@ -1,23 +1,27 @@
 <template>
   <div class="debug-info">
     <div><strong>PWA Debug Info:</strong></div>
-    <div>beforeinstallprompt fired: {{ debugInfo.promptFired ? '✅' : '❌' }}</div>
-    <div>Service Worker: {{ debugInfo.swRegistered ? '✅' : '❌' }}</div>
-    <div>Standalone mode: {{ debugInfo.isStandalone ? '✅' : '❌' }}</div>
+    <div>
+      beforeinstallprompt fired: {{ debugInfo.promptFired ? "✅" : "❌" }}
+    </div>
+    <div>Service Worker: {{ debugInfo.swRegistered ? "✅" : "❌" }}</div>
+    <div>Standalone mode: {{ debugInfo.isStandalone ? "✅" : "❌" }}</div>
     <div>Platform: {{ debugInfo.platform }}</div>
     <div>Protocol: {{ debugInfo.protocol }}</div>
-    <div>Install available: {{ debugInfo.canInstall ? '✅' : '❌' }}</div>
+    <div>Install available: {{ debugInfo.canInstall ? "✅" : "❌" }}</div>
+    <div v-if="debugInfo.manifestUrl">Manifest: ✅ Found</div>
+    <div v-else>Manifest: ❌ Not found</div>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'DebugInfo',
+  name: "DebugInfo",
   props: {
     debugInfo: {
       type: Object,
-      required: true
-    }
-  }
-}
+      required: true,
+    },
+  },
+};
 </script>
